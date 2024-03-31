@@ -1,4 +1,4 @@
-function [Shares, globalCost] = PumpAndDump(Shares, AlgorithmParams, ProblemParams, globalCost, ub, lb, beta)
+function [Shares, globalCost] = DumpAndPump(Shares, AlgorithmParams, ProblemParams, globalCost, ub, lb, beta)
     % Generate temporary new shares
     TempShares = ModifiedGenerateNewShare(AlgorithmParams.NumOfShares, ProblemParams);
     
