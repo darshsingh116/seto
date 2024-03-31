@@ -23,9 +23,9 @@ alpha = 0.05;  % Significance level
 funcNames = arrayfun(@(x) ['F' num2str(x)], 1:30, 'UniformOutput', false);
 funcNames(2) = [];  % Remove F2
 
-% Initialize results storage
-originalCosts = cell(1, length(funcNames));
-modifiedCosts = cell(1, length(funcNames));
+% Initialize results storage as single matrices
+originalCosts = zeros(length(funcNames), numRuns);
+modifiedCosts = zeros(length(funcNames), numRuns);
 pValues = zeros(1, length(funcNames));
 
 % Set up parallel pool for GPU computations
@@ -37,34 +37,24 @@ gpuDevice(); % This will automatically select the first available Nvidia GPU
 parfor i = 1:length(funcNames)
     funcName = funcNames{i};
     
-    % Run algorithms and store average costs
-    originalCosts{i} = zeros(1, numRuns);
-    modifiedCosts{i} = zeros(1, numRuns);
+    % Run algorithms and store average costs directly in single matrices
     for run = 1:numRuns
-        originalCosts{i}(run) = OriginalSolo(numRuns, funcName);
-        modifiedCosts{i}(run) = ModifiedSolo(numRuns, funcName);
+        originalCosts(i, run) = OriginalSolo(numRuns, funcName);
+        modifiedCosts(i, run) = ModifiedSolo(numRuns, funcName);
         % Print the cost after each run (may not display in real-time due to parallel execution)
         disp(['func', funcNames{i}]);
-        fprintf('Run %d - Original Cost: %.4f, Modified Cost: %.4f\n', run, originalCosts{i}(run), modifiedCosts{i}(run));
+        fprintf('Run %d - Original Cost: %.4f, Modified Cost: %.4f\n', run, originalCosts(i, run), modifiedCosts(i, run));
     end
     
     % Perform two-sample t-test (assuming costs are normally distributed)
-    [~, pValues(i)] = ttest2(originalCosts{i}, modifiedCosts{i});
+    [~, pValues(i)] = ttest2(originalCosts(i, :), modifiedCosts(i, :));
 end
-% Create new matrices to store the results
-originalAnswerMatrix = zeros(length(funcNames), numRuns);
-modifiedAnswerMatrix = zeros(length(funcNames), numRuns);
 
-% Store data from original and modified matrices to new matrices
-for i = 1:length(funcNames)
-    originalAnswerMatrix(i, :) = originalCosts{i};
-    modifiedAnswerMatrix(i, :) = modifiedCosts{i};
-end
 % Display results
 for i = 1:length(funcNames)
     funcName = funcNames{i};
-    avgOriginalCost = mean(originalCosts{i});
-    avgModifiedCost = mean(modifiedCosts{i});
+    avgOriginalCost = mean(originalCosts(i, :));
+    avgModifiedCost = mean(modifiedCosts(i, :));
     pValue = pValues(i);
     
     fprintf('Function: %s\n', funcName);

@@ -39,9 +39,9 @@ function globalCost = ModifiedSolo(numRuns,funcName)
         
         
         %% Algorithmic Parameter Setting
-        AlgorithmParams.NumOfShares = 30;
+        AlgorithmParams.NumOfShares = 50;
         AlgorithmParams.NumOfTraders = 1000;
-        AlgorithmParams.NumOfDays = 200;
+        AlgorithmParams.NumOfDays = 1200;
         
         InitialShares = ModifiedGenerateNewShare(AlgorithmParams.NumOfShares, ProblemParams);
         InitialCost = zeros(1, AlgorithmParams.NumOfShares); % Initialize an array to store individual costs
