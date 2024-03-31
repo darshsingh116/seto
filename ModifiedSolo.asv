@@ -1,9 +1,6 @@
-function [avgCost,globalCostsArr] = RunAlgorithm(numRuns,funcName)
-    globalCosts = zeros(1, numRuns);
-   
-    for run = 1:numRuns
+function globalCost = ModifiedSolo(numRuns,funcName)        
         alpha=0.5;
-        alphaDump=0.98;
+        alphaDump=0.95;
         RSITimeFrame=14;
         
         ProblemParams.CostFuncName = funcName;
@@ -21,6 +18,8 @@ function [avgCost,globalCostsArr] = RunAlgorithm(numRuns,funcName)
         
         ProblemParams.VarMin =ProblemParams.lb;
         ProblemParams.VarMax = ProblemParams.ub;
+        
+        
         %fprintf("here");
         if isscalar(ProblemParams.VarMin)
             
@@ -41,16 +40,16 @@ function [avgCost,globalCostsArr] = RunAlgorithm(numRuns,funcName)
         
         %% Algorithmic Parameter Setting
         AlgorithmParams.NumOfShares = 25;
-        AlgorithmParams.NumOfTraders = 100;
-        AlgorithmParams.NumOfDays = 100;
+        AlgorithmParams.NumOfTraders = 1000;
+        AlgorithmParams.NumOfDays = 200;
         
-        InitialShares = GenerateNewShare(AlgorithmParams.NumOfShares, ProblemParams);
+        InitialShares = ModifiedGenerateNewShare(AlgorithmParams.NumOfShares, ProblemParams);
         InitialCost = zeros(1, AlgorithmParams.NumOfShares); % Initialize an array to store individual costs
         for i = 1:AlgorithmParams.NumOfShares
             InitialCost(i) = feval(ProblemParams.CostFuncName, InitialShares(i,:)); % Calculate cost for each share
         end
         %InitialCost = feval(ProblemParams.CostFuncName,InitialShares); %here error
-        Shares = CreateInitialShares(InitialShares,InitialCost',AlgorithmParams, ProblemParams); %sometimes ' is used sometimes not note
+        Shares = ModifiedCreateInitialShares(InitialShares,InitialCost',AlgorithmParams, ProblemParams); %sometimes ' is used sometimes not note
         
         local=Shares;
         Costs = [Shares.Cost];
@@ -60,21 +59,22 @@ function [avgCost,globalCostsArr] = RunAlgorithm(numRuns,funcName)
         globalCost = Shares(BestIndex).Cost;
         
         for itr = 1:AlgorithmParams.NumOfDays
+            
             for ii=1:AlgorithmParams.NumOfShares
-                if(itr>RSITimeFrame && Shares(ii).RSI(itr-1)<30)
-                    [Shares, AlgorithmParams]= Rising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
+                if(itr>RSITimeFrame && Shares(ii).RSI(itr-1)<45)
+                    [Shares, AlgorithmParams]= ModifiedRising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
                 elseif(itr>RSITimeFrame && Shares(ii).RSI(itr-1)>70)
-                    [Shares, local, AlgorithmParams]= Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr);
+                    [Shares, local, AlgorithmParams]= ModifiedFalling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,globalCost,itr);
                 else
                     r=rand;
-                    if(r>0.5)
-                        [Shares, AlgorithmParams]= Rising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
+                    if(r>0.2)
+                        [Shares, AlgorithmParams]= ModifiedRising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
                     else
-                        [Shares, local, AlgorithmParams]= Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr);
+                        [Shares, local, AlgorithmParams]= ModifiedFalling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,globalCost,itr);
                     end
                 end
                 
-                [Shares, AlgorithmParams]= Exchange(Shares, AlgorithmParams);
+                [Shares, AlgorithmParams]= ModifiedExchange(Shares, AlgorithmParams, ProblemParams.ub,ProblemParams.lb);
                 
                 si=numel(Shares(ii).priceChanges);
                 if(itr>=RSITimeFrame)
@@ -97,13 +97,20 @@ function [avgCost,globalCostsArr] = RunAlgorithm(numRuns,funcName)
             end
             
             %fprintf('Minimum Cost in Iteration %d is %e \n', itr, globalCost);
+            
             alpha=alpha*alphaDump;
-        end
-        %fprintf('Minimum Cost in Run %d is %e \n', run, globalCost)
-        globalCosts(run) = globalCost;
-    end
+            if(itr== AlgorithmParams.NumOfDays/2 || itr== AlgorithmParams.NumOfDays/4)
+                alpha = 1;
+                alphaDump = 0.95;
+            end
+            
+            % Check if it's time to perform Pump and Dump
+            if(mod(AlgorithmParams.NumOfDays, 150) == 0)                
+                [Shares, globalCost] = PumpAndDump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.8);
+            elseif(mod(AlgorithmParams.NumOfDays, 10) == 0)              
+                [Shares, globalCost] = PumpAndDump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.8);
+            end
 
-    % Calculate average global cost
-    avgCost = mean(globalCosts);
-    globalCostsArr = globalCosts;
+        end
+
 end

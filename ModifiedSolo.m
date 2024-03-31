@@ -1,13 +1,13 @@
 function globalCost = ModifiedSolo(numRuns,funcName)        
         alpha=0.5;
-        alphaDump=0.98;
+        alphaDump=0.95;
         RSITimeFrame=14;
         
         ProblemParams.CostFuncName = funcName;
         
         
         %[lowerbound, upperbound, dimension, fobj]=Get_Functions_details(ProblemParams.CostFuncName);
-        [lowerbound, upperbound, dimension, fobj]=CEC2017(ProblemParams.CostFuncName);
+        [lowerbound, upperbound, dimension, fobj]=CEC2014(ProblemParams.CostFuncName);
         globalCost=0;
         
         ProblemParams.CostFuncName=fobj;
@@ -18,8 +18,7 @@ function globalCost = ModifiedSolo(numRuns,funcName)
         
         ProblemParams.VarMin =ProblemParams.lb;
         ProblemParams.VarMax = ProblemParams.ub;
-        rangeWidth =  ProblemParams.ub-ProblemParams.lb;
-        %alpha = rangeWidth * 0.1;
+        
         
         %fprintf("here");
         if isscalar(ProblemParams.VarMin)
@@ -40,9 +39,9 @@ function globalCost = ModifiedSolo(numRuns,funcName)
         
         
         %% Algorithmic Parameter Setting
-        AlgorithmParams.NumOfShares = 25;
-        AlgorithmParams.NumOfTraders = 100;
-        AlgorithmParams.NumOfDays = 100;
+        AlgorithmParams.NumOfShares = 30;
+        AlgorithmParams.NumOfTraders = 1000;
+        AlgorithmParams.NumOfDays = 200;
         
         InitialShares = ModifiedGenerateNewShare(AlgorithmParams.NumOfShares, ProblemParams);
         InitialCost = zeros(1, AlgorithmParams.NumOfShares); % Initialize an array to store individual costs
@@ -62,7 +61,7 @@ function globalCost = ModifiedSolo(numRuns,funcName)
         for itr = 1:AlgorithmParams.NumOfDays
             
             for ii=1:AlgorithmParams.NumOfShares
-                if(itr>RSITimeFrame && Shares(ii).RSI(itr-1)<40)
+                if(itr>RSITimeFrame && Shares(ii).RSI(itr-1)<45)
                     [Shares, AlgorithmParams]= ModifiedRising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
                 elseif(itr>RSITimeFrame && Shares(ii).RSI(itr-1)>70)
                     [Shares, local, AlgorithmParams]= ModifiedFalling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,globalCost,itr);
@@ -75,7 +74,7 @@ function globalCost = ModifiedSolo(numRuns,funcName)
                     end
                 end
                 
-                [Shares, AlgorithmParams]= ModifiedExchange(Shares, AlgorithmParams);
+                [Shares, AlgorithmParams]= ModifiedExchange(Shares, AlgorithmParams, ProblemParams.ub,ProblemParams.lb);
                 
                 si=numel(Shares(ii).priceChanges);
                 if(itr>=RSITimeFrame)
@@ -98,7 +97,21 @@ function globalCost = ModifiedSolo(numRuns,funcName)
             end
             
             %fprintf('Minimum Cost in Iteration %d is %e \n', itr, globalCost);
+            
             alpha=alpha*alphaDump;
+            if(itr== AlgorithmParams.NumOfDays/2 || itr== AlgorithmParams.NumOfDays/4)
+                alpha = 1;
+                alphaDump = 0.98;
+            end
+            
+            % Check if it's time to perform Pump and Dump
+            if(mod(AlgorithmParams.NumOfDays, 20) == 0)                
+                [Shares, globalCost] = DumpAndPump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.3);
+            end
+            if(mod(AlgorithmParams.NumOfDays, 10) == 0)              
+                [Shares, globalCost] = PumpAndDump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.8);
+            end
+
         end
 
 end
