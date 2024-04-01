@@ -6,7 +6,7 @@ numRuns = 50;
 alpha = 0.05;  % Significance level
 
 % Function names (excluding F2)
-funcNames = arrayfun(@(x) ['F' num2str(x)], 23:23, 'UniformOutput', false);
+funcNames = arrayfun(@(x) ['F' num2str(x)], 1:1, 'UniformOutput', false);
 %funcNames(2) = [];  % Remove F2
 
 % Initialize results storage

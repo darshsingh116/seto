@@ -2,12 +2,12 @@ clc;
 clear;
 clear all;
 % Specify number of runs and significance level
-numRuns = 100;
+numRuns = 50;
 alpha = 0.05;  % Significance level
 
 % Function names (excluding F2)
-funcNames = arrayfun(@(x) ['F' num2str(x)], 1:30, 'UniformOutput', false);
-funcNames(2) = [];  % Remove F2
+funcNames = arrayfun(@(x) ['F' num2str(x)], 6:6, 'UniformOutput', false);
+%funcNames(2) = [];  % Remove F2
 
 % Initialize results storage
 originalCosts = cell(1, length(funcNames));
@@ -22,8 +22,11 @@ for i = 1:length(funcNames)
   for run = 1:numRuns
     originalCosts{i}(run) = OriginalSolo(numRuns, funcName);
     modifiedCosts{i}(run) = ModifiedSolo(numRuns, funcName);
+    % Print the cost after each run
+    disp(['func', funcNames{i}]);
+    fprintf('Run %d - Original Cost: %.4f, Modified Cost: %.4f\n', run, originalCosts{i}(run), modifiedCosts{i}(run));
   end
-  disp(['func', funcNames{i}]);
+  
   
   % Perform two-sample t-test (assuming costs are normally distributed)
   [~, pValues(i)] = ttest2(originalCosts{i}, modifiedCosts{i});

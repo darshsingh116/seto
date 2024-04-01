@@ -7,7 +7,7 @@ function globalCost = ModifiedSolo(numRuns,funcName)
         
         
         %[lowerbound, upperbound, dimension, fobj]=Get_Functions_details(ProblemParams.CostFuncName);
-        [lowerbound, upperbound, dimension, fobj]=CEC2014(ProblemParams.CostFuncName);
+        [lowerbound, upperbound, dimension, fobj]=CEC2017(ProblemParams.CostFuncName);
         globalCost=0;
         
         ProblemParams.CostFuncName=fobj;
@@ -39,7 +39,7 @@ function globalCost = ModifiedSolo(numRuns,funcName)
         
         
         %% Algorithmic Parameter Setting
-        AlgorithmParams.NumOfShares = 25;
+        AlgorithmParams.NumOfShares = 30;
         AlgorithmParams.NumOfTraders = 1000;
         AlgorithmParams.NumOfDays = 200;
         
@@ -99,15 +99,16 @@ function globalCost = ModifiedSolo(numRuns,funcName)
             %fprintf('Minimum Cost in Iteration %d is %e \n', itr, globalCost);
             
             alpha=alpha*alphaDump;
-            if(itr== AlgorithmParams.NumOfDays/2 || itr== AlgorithmParams.NumOfDays/4)
+            if(itr == AlgorithmParams.NumOfDays/2 || itr == AlgorithmParams.NumOfDays/4)
                 alpha = 1;
-                alphaDump = 0.95;
+                alphaDump = 0.98;
             end
             
             % Check if it's time to perform Pump and Dump
-            if(mod(AlgorithmParams.NumOfDays, 150) == 0)                
-                [Shares, globalCost] = PumpAndDump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.8);
-            elseif(mod(AlgorithmParams.NumOfDays, 10) == 0)              
+            if(mod(AlgorithmParams.NumOfDays, 20) == 0)                
+                [Shares, globalCost] = DumpAndPump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.3);
+            end
+            if(mod(AlgorithmParams.NumOfDays, 10) == 0)              
                 [Shares, globalCost] = PumpAndDump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.8);
             end
 

@@ -7,7 +7,7 @@ function globalCost = OriginalSolo(numRuns,funcName)
         
         
         %[lowerbound, upperbound, dimension, fobj]=Get_Functions_details(ProblemParams.CostFuncName);
-        [lowerbound, upperbound, dimension, fobj]=CEC2014(ProblemParams.CostFuncName);
+        [lowerbound, upperbound, dimension, fobj]=CEC2017(ProblemParams.CostFuncName);
         globalCost=0;
         
         ProblemParams.CostFuncName=fobj;
@@ -39,7 +39,7 @@ function globalCost = OriginalSolo(numRuns,funcName)
         %% Algorithmic Parameter Setting
         AlgorithmParams.NumOfShares = 50;
         AlgorithmParams.NumOfTraders = 100;
-        AlgorithmParams.NumOfDays = 1200;
+        AlgorithmParams.NumOfDays = 1800;
         
         InitialShares = GenerateNewShare(AlgorithmParams.NumOfShares, ProblemParams);
         InitialCost = zeros(1, AlgorithmParams.NumOfShares); % Initialize an array to store individual costs

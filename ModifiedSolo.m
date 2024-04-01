@@ -7,7 +7,7 @@ function globalCost = ModifiedSolo(numRuns,funcName)
         
         
         %[lowerbound, upperbound, dimension, fobj]=Get_Functions_details(ProblemParams.CostFuncName);
-        [lowerbound, upperbound, dimension, fobj]=CEC2014(ProblemParams.CostFuncName);
+        [lowerbound, upperbound, dimension, fobj]=CEC2017(ProblemParams.CostFuncName);
         globalCost=0;
         
         ProblemParams.CostFuncName=fobj;
@@ -41,7 +41,7 @@ function globalCost = ModifiedSolo(numRuns,funcName)
         %% Algorithmic Parameter Setting
         AlgorithmParams.NumOfShares = 50;
         AlgorithmParams.NumOfTraders = 1000;
-        AlgorithmParams.NumOfDays = 1200;
+        AlgorithmParams.NumOfDays = 1800;
         
         InitialShares = ModifiedGenerateNewShare(AlgorithmParams.NumOfShares, ProblemParams);
         InitialCost = zeros(1, AlgorithmParams.NumOfShares); % Initialize an array to store individual costs
@@ -99,9 +99,9 @@ function globalCost = ModifiedSolo(numRuns,funcName)
             %fprintf('Minimum Cost in Iteration %d is %e \n', itr, globalCost);
             
             alpha=alpha*alphaDump;
-            if(itr== AlgorithmParams.NumOfDays/2 || itr== AlgorithmParams.NumOfDays/4)
+            if(itr == AlgorithmParams.NumOfDays/2 || itr == AlgorithmParams.NumOfDays/4)
                 alpha = 1;
-                alphaDump = 0.98;
+                alphaDump = 0.95;
             end
             
             % Check if it's time to perform Pump and Dump
