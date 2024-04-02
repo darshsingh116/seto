@@ -3,11 +3,11 @@ close all;
 clc;
 
 alpha=0.5;
-alpha2=0.5;
+alpha2=1;
 alphaDump=0.98;
 RSITimeFrame=14;
 
-ProblemParams.CostFuncName = "F1";
+ProblemParams.CostFuncName = "F2";
 
 
 %[lowerbound, upperbound, dimension, fobj]=Get_Functions_details(ProblemParams.CostFuncName);
@@ -63,17 +63,18 @@ bestSolution = Shares(BestIndex).Position;
 globalCost = Shares(BestIndex).Cost;
 
 for itr = 1:AlgorithmParams.NumOfDays
+    disp([num2str(alpha)]);
     for ii=1:AlgorithmParams.NumOfShares
         if(itr>RSITimeFrame && Shares(ii).RSI(itr-1)<30)
             [Shares, AlgorithmParams]= ModifiedRising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
         elseif(itr>RSITimeFrame && Shares(ii).RSI(itr-1)>70)
-            [Shares, local, AlgorithmParams]= m2Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr,alpha);
+            [Shares, local, AlgorithmParams]= m2Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr,alpha2);
         else
             r=rand;
             if(r>0.5)
                 [Shares, AlgorithmParams]= ModifiedRising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
             else
-                [Shares, local, AlgorithmParams]= m2Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr,alpha);
+                [Shares, local, AlgorithmParams]= m2Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr,alpha2);
             end
         end
         
@@ -101,18 +102,19 @@ for itr = 1:AlgorithmParams.NumOfDays
     
     fprintf('Minimum Cost in Iteration %d is %f \n', itr, globalCost);
     alpha=alpha*alphaDump;
-
+    alpha2=alpha2*0.98;
     
     % Check if it's time to perform Pump and Dump
-    if(mod(AlgorithmParams.NumOfDays, 20) == 0)                
+    if(mod(itr, 20) == 0)                
         [Shares, globalCost] = DumpAndPump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.3);
     end
-    if(mod(AlgorithmParams.NumOfDays, 10) == 0)              
+    if(mod(itr, 10) == 0)              
         [Shares, globalCost] = PumpAndDump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.8);
     end
     
-    if(mod(AlgorithmParams.NumOfDays, 200) == 0)   
+    if(mod(itr, 200) == 0)
         alpha = 0.5;
+        alpha2 = 1;
     end
     
 
