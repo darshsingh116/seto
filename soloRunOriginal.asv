@@ -3,7 +3,6 @@ close all;
 clc;
 
 alpha=0.5;
-alpha2=0.5;
 alphaDump=0.98;
 RSITimeFrame=14;
 
@@ -22,8 +21,6 @@ ProblemParams.gcost=globalCost;
 
 ProblemParams.VarMin =ProblemParams.lb;
 ProblemParams.VarMax = ProblemParams.ub;
-
-
 %fprintf("here");
 if isscalar(ProblemParams.VarMin)
     
@@ -45,15 +42,15 @@ end
 %% Algorithmic Parameter Setting
 AlgorithmParams.NumOfShares = 30;
 AlgorithmParams.NumOfTraders = 100;
-AlgorithmParams.NumOfDays = 1800;
+AlgorithmParams.NumOfDays = 2000;
 
-InitialShares = ModifiedGenerateNewShare(AlgorithmParams.NumOfShares, ProblemParams);
+InitialShares = GenerateNewShare(AlgorithmParams.NumOfShares, ProblemParams);
 InitialCost = zeros(1, AlgorithmParams.NumOfShares); % Initialize an array to store individual costs
 for i = 1:AlgorithmParams.NumOfShares
     InitialCost(i) = feval(ProblemParams.CostFuncName, InitialShares(i,:)); % Calculate cost for each share
 end
 %InitialCost = feval(ProblemParams.CostFuncName,InitialShares); %here error
-Shares = ModifiedCreateInitialShares(InitialShares,InitialCost',AlgorithmParams, ProblemParams); %sometimes ' is used sometimes not note
+Shares = CreateInitialShares(InitialShares,InitialCost',AlgorithmParams, ProblemParams); %sometimes ' is used sometimes not note
 
 local=Shares;
 Costs = [Shares.Cost];
@@ -65,15 +62,15 @@ globalCost = Shares(BestIndex).Cost;
 for itr = 1:AlgorithmParams.NumOfDays
     for ii=1:AlgorithmParams.NumOfShares
         if(itr>RSITimeFrame && Shares(ii).RSI(itr-1)<30)
-            [Shares, AlgorithmParams]= ModifiedRising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
+            [Shares, AlgorithmParams]= Rising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
         elseif(itr>RSITimeFrame && Shares(ii).RSI(itr-1)>70)
-            [Shares, local, AlgorithmParams]= m2Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr,alpha2);
+            [Shares, local, AlgorithmParams]= Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr);
         else
             r=rand;
             if(r>0.5)
-                [Shares, AlgorithmParams]= ModifiedRising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
+                [Shares, AlgorithmParams]= Rising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
             else
-                [Shares, local, AlgorithmParams]= m2Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr,alpha2);
+                [Shares, local, AlgorithmParams]= Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr);
             end
         end
         
@@ -101,23 +98,4 @@ for itr = 1:AlgorithmParams.NumOfDays
     
     fprintf('Minimum Cost in Iteration %d is %f \n', itr, globalCost);
     alpha=alpha*alphaDump;
-
-    
-    % Check if it's time to perform Pump and Dump
-    if(mod(AlgorithmParams.NumOfDays, 20) == 0)                
-        [Shares, globalCost] = DumpAndPump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.3);
-    end
-    if(mod(AlgorithmParams.NumOfDays, 10) == 0)              
-        [Shares, globalCost] = PumpAndDump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.8);
-    end
-    
-    if(mod(AlgorithmParams.NumOfDays, 200) == 0)   
-        alpha = 0.5;
-    end
-    
-
 end
-
-
-
-

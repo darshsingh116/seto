@@ -1,0 +1,31 @@
+function [Shares, local, AlgorithmParams] = m2Falling(ii,Shares,local, AlgorithmParams,ProblemParams, BestShare,itr,alpha)
+    
+    preCost=Shares(ii).Cost;
+    Shares(ii).NumOfSellers=max(1, Shares(ii).NumOfSellers);
+    AlgorithmParams.NegativeCoefficient=Shares(ii).NumOfSellers/(Shares(ii).NumOfBuyers+1);
+    %d=local(ii).Position-Shares(ii).Position;
+    d = BestShare - Shares(ii).Position;
+    randomFactor = (alpha) * rand();
+    %Shares(ii).Position = (Shares(ii).Position - d) .* AlgorithmParams.NegativeCoefficient .* randomFactor;
+    Shares(ii).Position=BestShare - Shares(ii).Position .*AlgorithmParams.NegativeCoefficient* randomFactor;
+    Shares(ii).Position=max(Shares(ii).Position,ProblemParams.VarMin);
+    Shares(ii).Position=min(Shares(ii).Position,ProblemParams.VarMax);
+    Shares(ii).Cost =feval(ProblemParams.CostFuncName,Shares(ii).Position);
+    if(Shares(ii).Cost<preCost)
+        Shares(ii).priceChanges(itr)=1;
+        Shares(ii).NumOfBuyers=min(Shares(ii).NumOfBuyers+1,Shares(ii).NumOfTraders) ;
+        Shares(ii).NumOfSellers=max(Shares(ii).NumOfSellers-1, 0);
+        
+    elseif (Shares(ii).Cost>preCost)
+        Shares(ii).priceChanges(itr)=-1;
+        Shares(ii).NumOfBuyers=max(Shares(ii).NumOfBuyers-1,0) ;
+        Shares(ii).NumOfSellers=min(Shares(ii).NumOfSellers+1, Shares(ii).NumOfTraders);
+    else
+        Shares(ii).priceChanges(itr)=0;
+    end
+    
+    if(Shares(ii).Cost<local(ii).Cost)
+        local(ii).Position=Shares(ii).Position;
+        local(ii).Cost=Shares(ii).Cost;
+    end
+end

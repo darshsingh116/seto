@@ -9,7 +9,7 @@ function [Shares, globalCost] = PumpAndDump(Shares, AlgorithmParams, ProblemPara
     bestPosition = Shares(bestIndex).Position;
     
     for i = 1:AlgorithmParams.NumOfShares
-        newPosition = bestPosition + (beta * (ub - lb)) * (rand(1, ProblemParams.NPar));
+        newPosition = bestPosition + (beta * (ub - lb)) * (2 * rand(1, ProblemParams.NPar) - 1);
         
         % Ensure positions are within bounds
         newPosition(newPosition > ub) = ub;

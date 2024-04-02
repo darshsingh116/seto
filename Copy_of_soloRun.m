@@ -7,7 +7,7 @@ alpha2=0.5;
 alphaDump=0.98;
 RSITimeFrame=14;
 
-ProblemParams.CostFuncName = "F2";
+ProblemParams.CostFuncName = "F1";
 
 
 %[lowerbound, upperbound, dimension, fobj]=Get_Functions_details(ProblemParams.CostFuncName);
@@ -67,13 +67,13 @@ for itr = 1:AlgorithmParams.NumOfDays
         if(itr>RSITimeFrame && Shares(ii).RSI(itr-1)<30)
             [Shares, AlgorithmParams]= ModifiedRising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
         elseif(itr>RSITimeFrame && Shares(ii).RSI(itr-1)>70)
-            [Shares, local, AlgorithmParams]= m2Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr,alpha2);
+            [Shares, local, AlgorithmParams]= m2Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr,alpha);
         else
             r=rand;
             if(r>0.5)
                 [Shares, AlgorithmParams]= ModifiedRising(ii,Shares,AlgorithmParams,ProblemParams,bestSolution,itr, alpha);
             else
-                [Shares, local, AlgorithmParams]= m2Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr,alpha2);
+                [Shares, local, AlgorithmParams]= m2Falling(ii,Shares, local, AlgorithmParams,ProblemParams,bestSolution,itr,alpha);
             end
         end
         
