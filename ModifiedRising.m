@@ -4,7 +4,9 @@ function [Shares, AlgorithmParams] = ModifiedRising(ii, Shares, AlgorithmParams,
 
     s = (BestShare - Shares(ii).Position);
     randomFactor = alpha * rand(size(s));  % Scale random factor by alpha
-    Shares(ii).Position = Shares(ii).Position + AlgorithmParams.PositiveCoefficient * randomFactor .* s;
+    %Shares(ii).Position = Shares(ii).Position + AlgorithmParams.PositiveCoefficient * randomFactor .* s;
+    Shares(ii).Position = Shares(ii).Position +AlgorithmParams.PositiveCoefficient * rand(size(s)) .* s;
+
     Shares(ii).Position = max(Shares(ii).Position, ProblemParams.VarMin);
     Shares(ii).Position = min(Shares(ii).Position, ProblemParams.VarMax);
     Shares(ii).Cost = feval(ProblemParams.CostFuncName, Shares(ii).Position);

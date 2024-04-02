@@ -7,7 +7,7 @@ alpha2=1;
 alphaDump=0.98;
 RSITimeFrame=14;
 
-ProblemParams.CostFuncName = "F2";
+ProblemParams.CostFuncName = "F26";
 
 
 %[lowerbound, upperbound, dimension, fobj]=Get_Functions_details(ProblemParams.CostFuncName);
