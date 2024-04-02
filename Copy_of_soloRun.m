@@ -105,11 +105,9 @@ for itr = 1:AlgorithmParams.NumOfDays
     alpha2=alpha2*0.98;
     
     % Check if it's time to perform Pump and Dump
-    if(mod(itr, 20) == 0)                
-        [Shares, globalCost] = DumpAndPump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.3);
-    end
+    randomNumber = 0.5 + rand * (0.8 - 0.5);
     if(mod(itr, 10) == 0)              
-        [Shares, globalCost] = PumpAndDump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,0.8);
+        [Shares, globalCost] = PumpAndDump(Shares, AlgorithmParams, ProblemParams, globalCost, ProblemParams.ub, ProblemParams.lb,randomNumber);
     end
     
     if(mod(itr, 200) == 0)
